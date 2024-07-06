@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using CarrinhoProjeto.Models;
 using CarrinhoProjeto.Repositories;
 
+// Segui as rotas exigidas na atividade, entretanto acredito que pra melhor entendimento 
+// seria ideal chamar as rotas por nomes mais referentes ao que elas fazem exatamente
+// como post /api/carrinho/{id}/itens
+
 namespace CarrinhoProjeto.Controllers
 {
     [Route("api/[controller]")]

@@ -1,0 +1,171 @@
+@model CarrinhoProjeto.Models.Carrinho
+
+@{
+    ViewData["Title"] = "Carrinho de Compras";
+}
+
+@* 
+    Como na atividade não foi exigido um fluxo de seleção de carrinhos eu optei 
+    por definir tudo para o id 1 (trantando-se de um campo que existe no meu 
+    banco local), analisando o algoritmo podemos confirmar isso. 
+*@
+
+@* 
+    Também não dei muita enfase no layout da página, sou desenvolvedor de front e back
+    mas como de momento será avaliado mais o aspecto de back preferi não gastar tempo 
+    com isso.
+*@
+
+<h1>Carrinho de Compras</h1>
+<table id="carrinhoTable" class="table">
+    <thead>
+        <tr>
+            <th>Nome do Produto</th>
+            <th>Quantidade</th>
+            <th>Preço Unitário</th>
+            <th>Preço Total</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Itens)
+        {
+            <tr>
+                <td>@item.Produto</td>
+                <td>
+                    <input type="number" value="@item.Quantidade" min="1"
+                        onchange="updateItem(@item.Id, this.value, @item.PrecoUnitario)" />
+                </td>
+                <td>@item.PrecoUnitario</td>
+                <td>@item.PrecoTotal</td>
+                <td>
+                    <button class="btn btn-danger" onclick="removeItem(@item.Id)">Excluir</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<button type="button" class="btn btn-primary" onclick="showAddItemModal()">Adicionar Item</button>
+<div class="modal" id="addItemModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addItemForm">
+                    <div class="form-group">
+                        <label for="produtoNome">Nome do Produto</label>
+                        <input type="text" class="form-control" id="produtoNome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="produtoPreco">Preço Unitário</label>
+                        <input type="number" class="form-control" id="produtoPreco" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="produtoQuantidade">Quantidade</label>
+                        <input type="number" class="form-control" id="produtoQuantidade" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="addItem()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function loadCarrinho() {
+            $.get("/api/carrinho/1", function (data) {
+                var tableBody = $("#carrinhoTable tbody");
+                tableBody.empty();
+                data.itens.forEach(function (item) {
+                    var row = `<tr>
+                            <td>${item.nomeProduto}</td>
+                            <td><input type="number" value="${item.quantidade}" min="1" onchange="updateItem(${item.id}, this.value, ${item.precoUnitario})"></td>
+                            <td>${item.precoUnitario}</td>
+                            <td>${item.precoTotal}</td>
+                            <td><button class="btn btn-danger" onclick="removeItem(${item.id})">Excluir</button></td>
+                        </tr>`;
+                    tableBody.append(row);
+                });
+            });
+        }
+
+        function showAddItemModal() {
+            $("#addItemForm")[0].reset();
+            $("#addItemModal").modal("show");
+        }
+
+        function addItem() {
+            var nome = $("#produtoNome").val();
+            var preco = parseFloat($("#produtoPreco").val());
+            var quantidade = parseInt($("#produtoQuantidade").val());
+
+            if (!nome || preco <= 0 || quantidade <= 0 || isNaN(quantidade)) {
+                alert("Por favor, preencha todos os campos corretamente.");
+                return;
+            }
+
+            var item = {
+                Produto: nome,
+                PrecoUnitario: preco,
+                Quantidade: quantidade
+            };
+
+            $.ajax({
+                url: '/api/carrinho/1',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(item),
+                success: function () {
+                    $("#addItemModal").modal("hide");
+                    loadCarrinho();
+                },
+                error: function (error) {
+                    console.log("Erro ao adicionar item: ", error);
+                    alert("Ocorreu um erro ao adicionar o item.");
+                }
+            });
+        }
+
+        function removeItem(id) {
+            $.ajax({
+                url: `/api/carrinho/${id}`,
+                type: 'DELETE',
+                success: function () {
+                    loadCarrinho();
+                }
+            });
+        }
+
+        function updateItem(id, quantidade, precoUnitario) {
+            var item = {
+                quantidade: parseInt(quantidade),
+                precoUnitario: parseFloat(precoUnitario)
+            };
+
+            $.ajax({
+                url: `/api/carrinho/${id}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(item),
+                success: function () {
+                    loadCarrinho();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            loadCarrinho();
+        });
+    </script>
+}

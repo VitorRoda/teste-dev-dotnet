@@ -4,6 +4,8 @@ using teste_dev_dotnet.Models;
 
 namespace teste_dev_dotnet.Controllers;
 
+// Mantive as telas bases de quando criamos a aplicação, para acessar atividade va até a rota http://localhost:5042/CarrinhoPage
+
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
