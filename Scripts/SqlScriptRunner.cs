@@ -22,9 +22,11 @@ public class SqlScriptRunner : IHostedService
     {
         var carrinhosScript = await File.ReadAllTextAsync(Path.Combine(_scriptsPath, "CreateCarrinhosTable.sql"));
         var carrinhoItensScript = await File.ReadAllTextAsync(Path.Combine(_scriptsPath, "CreateCarrinhoItensTable.sql"));
+        var addCarrinhoScript = await File.ReadAllTextAsync(Path.Combine(_scriptsPath, "CreateCarrinho.sql"));
 
         await _dbConnection.ExecuteAsync(carrinhosScript);
         await _dbConnection.ExecuteAsync(carrinhoItensScript);
+        await _dbConnection.ExecuteAsync(addCarrinhoScript);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
