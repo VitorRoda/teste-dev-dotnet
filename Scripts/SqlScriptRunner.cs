@@ -1,11 +1,5 @@
-using System;
 using System.Data;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 
 public class SqlScriptRunner : IHostedService
 {

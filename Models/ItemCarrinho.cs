@@ -1,5 +1,3 @@
-using System;
-
 namespace CarrinhoProjeto.Models
 {
     public class ItemCarrinho
